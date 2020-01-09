@@ -86,6 +86,7 @@ func (proxy *ProxyHttpServer) handleHttps(w http.ResponseWriter, r *http.Request
 		if newtodo != nil {
 			todo, host = newtodo, newhost
 			ctx.Logf("on %dth handler: %v %s", i, todo, host)
+			ctx.Logf("IP: %s", getIP(r))
 			break
 		}
 	}
@@ -437,4 +438,12 @@ func TLSConfigFromCA(ca *tls.Certificate) func(host string, ctx *ProxyCtx) (*tls
 		config.Certificates = append(config.Certificates, *cert)
 		return &config, nil
 	}
+}
+
+func getIP(r *http.Request) string {
+	forwarded := r.Header.Get("X-FORWARDED-FOR")
+	if forwarded != "" {
+		return forwarded
+	}
+	return r.RemoteAddr
 }
